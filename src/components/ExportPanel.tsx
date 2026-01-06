@@ -86,9 +86,9 @@ export function ExportPanel() {
         disabled={!hasImages || isZipping}
       >
         {isZipping ? (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          <Loader2 className=" animate-spin" />
         ) : (
-          <Download className="mr-2 h-4 w-4" />
+          <Download className="" />
         )}
         {isZipping ? '打包中...' : '下载 ZIP'}
       </Button>
@@ -101,9 +101,9 @@ export function ExportPanel() {
           disabled={!hasImages || isExporting}
         >
           {isExporting ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className=" animate-spin" />
           ) : (
-            <FolderOpen className="mr-2 h-4 w-4" />
+            <FolderOpen className="" />
           )}
           {isExporting ? '导出中...' : '保存到文件夹'}
         </Button>
@@ -115,7 +115,7 @@ export function ExportPanel() {
         onClick={handleClearAll}
         disabled={images.length === 0}
       >
-        <Trash2 className="mr-2 h-4 w-4" />
+        <Trash2 className="" />
         清空全部
       </Button>
 

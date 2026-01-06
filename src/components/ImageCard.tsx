@@ -29,7 +29,7 @@ export function ImageCard({ image }: ImageCardProps) {
   return (
     <Card
       className={`
-        relative overflow-hidden cursor-pointer transition-shadow hover:shadow-md
+        relative overflow-hidden cursor-pointer transition-shadow hover:shadow-md py-0 gap-0
         ${image.status === 'done' ? 'hover:ring-2 hover:ring-primary' : ''}
       `}
       onClick={handleClick}
@@ -50,7 +50,7 @@ export function ImageCard({ image }: ImageCardProps) {
         <img
           src={image.thumbnailUrl}
           alt={image.name}
-          className="max-w-full max-h-full object-contain"
+          className="w-full h-full object-contain"
         />
 
         {/* 处理中遮罩 */}
@@ -75,11 +75,17 @@ export function ImageCard({ image }: ImageCardProps) {
         </p>
 
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>{formatFileSize(image.originalSize)}</span>
-
+          <div className="flex items-center gap-1">
+            <span>{formatFileSize(image.originalSize)}</span>
+            {image.status === 'done' && image.compressedSize !== null && (
+              <>
+                <span>→</span>
+                <span>{formatFileSize(image.compressedSize)}</span>
+              </>
+            )}
+          </div>
           {image.status === 'done' && image.compressedSize !== null && (
             <div className="flex items-center gap-2">
-              <span>→ {formatFileSize(image.compressedSize)}</span>
               <Badge
                 variant="secondary"
                 className="text-green-600 dark:text-green-400"

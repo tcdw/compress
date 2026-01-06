@@ -53,6 +53,19 @@ function App() {
               <div className="text-xs text-muted-foreground text-center space-y-1">
                 <p>所有处理均在浏览器本地完成</p>
                 <p>图片不会上传到服务器</p>
+                <p>
+                  &copy; {process.env.BUILD_YEAR} tcdw ・ Released under MIT
+                  License
+                </p>
+                <p>
+                  <a
+                    href="https://github.com/tcdw/compress"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    GitHub
+                  </a>
+                </p>
               </div>
             </div>
           </aside>

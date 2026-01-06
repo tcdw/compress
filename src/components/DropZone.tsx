@@ -119,7 +119,7 @@ export function DropZone({ compact = false }: DropZoneProps) {
   if (compact) {
     return (
       <Button variant="outline" onClick={handleFileSelect} className="w-full">
-        <Upload className="mr-2 h-4 w-4" />
+        <Upload className="" />
         添加更多图片
       </Button>
     );
@@ -156,25 +156,20 @@ export function DropZone({ compact = false }: DropZoneProps) {
           `}
         >
           <Upload
-            className={`h-8 w-8 ${isDragging ? 'text-primary' : 'text-muted-foreground'}`}
+            className={`h-8 w-8 ${
+              isDragging ? 'text-primary' : 'text-muted-foreground'
+            }`}
           />
         </div>
         <div>
-          <p className="text-lg font-medium">拖拽图片到这里</p>
-          <p className="text-sm text-muted-foreground">
-            或点击下方按钮选择文件
+          <p className="text-lg font-medium">
+            拖拽图片到这里，或直接点我选择文件
           </p>
         </div>
         <p className="text-xs text-muted-foreground">
           支持 JPG、PNG、WebP 格式
         </p>
       </div>
-
-      <Button onClick={handleFileSelect}>
-        <Upload className="mr-2 h-4 w-4" />
-        选择图片
-      </Button>
-
       {error && (
         <div className="text-sm text-destructive text-center whitespace-pre-line">
           {error}
