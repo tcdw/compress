@@ -36,6 +36,7 @@ export const useImageStore = create<ImageStore>((set) => ({
     set((state) => {
       const image = state.images.find((img) => img.id === id);
       if (image) {
+        if (image.originalUrl) URL.revokeObjectURL(image.originalUrl);
         if (image.thumbnailUrl) URL.revokeObjectURL(image.thumbnailUrl);
         if (image.compressedUrl) URL.revokeObjectURL(image.compressedUrl);
       }
@@ -49,6 +50,7 @@ export const useImageStore = create<ImageStore>((set) => ({
   clearAllImages: () =>
     set((state) => {
       for (const image of state.images) {
+        if (image.originalUrl) URL.revokeObjectURL(image.originalUrl);
         if (image.thumbnailUrl) URL.revokeObjectURL(image.thumbnailUrl);
         if (image.compressedUrl) URL.revokeObjectURL(image.compressedUrl);
       }

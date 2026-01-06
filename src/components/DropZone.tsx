@@ -58,6 +58,7 @@ export function DropZone({ compact = false }: DropZoneProps) {
             originalWidth: dimensions.width,
             originalHeight: dimensions.height,
             originalType: file.type,
+            originalUrl: URL.createObjectURL(file),
             thumbnailUrl,
             compressedBlob: null,
             compressedSize: null,

@@ -51,7 +51,7 @@ export function CompareModal() {
             <ReactCompareSlider
               itemOne={
                 <ReactCompareSliderImage
-                  src={selectedImage.thumbnailUrl}
+                  src={selectedImage.originalUrl}
                   alt="原图"
                   style={{
                     objectFit: 'contain',

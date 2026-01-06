@@ -8,6 +8,7 @@ export interface ImageFile {
   originalWidth: number;
   originalHeight: number;
   originalType: string;
+  originalUrl: string;
   thumbnailUrl: string;
   compressedBlob: Blob | null;
   compressedSize: number | null;
