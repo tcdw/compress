@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import type { GlobalSettings, ImageFile } from '../types';
+import { create } from "zustand";
+import type { GlobalSettings, ImageFile } from "../types";
 
 interface ImageStore {
   images: ImageFile[];
@@ -13,7 +13,7 @@ interface ImageStore {
 
   setQuality: (quality: number) => void;
   setMaxWidth: (maxWidth: number | null) => void;
-  setOutputFormat: (format: GlobalSettings['outputFormat']) => void;
+  setOutputFormat: (format: GlobalSettings["outputFormat"]) => void;
 
   selectImage: (id: string | null) => void;
 }
@@ -23,7 +23,7 @@ export const useImageStore = create<ImageStore>((set) => ({
   settings: {
     quality: 0.8,
     maxWidth: null,
-    outputFormat: 'original',
+    outputFormat: "image/webp",
   },
   selectedImageId: null,
 
@@ -60,7 +60,7 @@ export const useImageStore = create<ImageStore>((set) => ({
   updateImage: (id, updates) =>
     set((state) => ({
       images: state.images.map((img) =>
-        img.id === id ? { ...img, ...updates } : img,
+        img.id === id ? { ...img, ...updates } : img
       ),
     })),
 

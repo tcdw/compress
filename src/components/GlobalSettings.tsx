@@ -1,22 +1,22 @@
-import { useImageStore } from '../store/useImageStore';
-import type { OutputFormat } from '../types';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
+import { useImageStore } from "../store/useImageStore";
+import type { OutputFormat } from "../types";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from './ui/select';
-import { Slider } from './ui/slider';
+} from "./ui/select";
+import { Slider } from "./ui/slider";
 
 const WIDTH_PRESETS = [
-  { label: '800px', value: 800 },
-  { label: '1200px', value: 1200 },
-  { label: '1920px', value: 1920 },
-  { label: '不限制', value: null },
+  { label: "800px", value: 800 },
+  { label: "1200px", value: 1200 },
+  { label: "1920px", value: 1920 },
+  { label: "不限制", value: null },
 ];
 
 export function GlobalSettings() {
@@ -27,7 +27,7 @@ export function GlobalSettings() {
 
   const handleWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    if (value === '' || value === '0') {
+    if (value === "" || value === "0") {
       setMaxWidth(null);
     } else {
       const num = Number.parseInt(value, 10);
@@ -65,7 +65,7 @@ export function GlobalSettings() {
         <Input
           type="number"
           placeholder="不限制"
-          value={settings.maxWidth ?? ''}
+          value={settings.maxWidth ?? ""}
           onChange={handleWidthChange}
           min={0}
         />
@@ -74,7 +74,7 @@ export function GlobalSettings() {
             <Button
               key={preset.label}
               variant={
-                settings.maxWidth === preset.value ? 'default' : 'outline'
+                settings.maxWidth === preset.value ? "default" : "outline"
               }
               size="sm"
               onClick={() => setMaxWidth(preset.value)}
@@ -99,14 +99,23 @@ export function GlobalSettings() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="original">保持原格式</SelectItem>
-            <SelectItem value="image/webp">WebP (推荐)</SelectItem>
-            <SelectItem value="image/jpeg">JPEG</SelectItem>
+            <SelectItem value="original" description="png 格式不支持降低画质">
+              保持原格式
+            </SelectItem>
+            <SelectItem
+              value="image/webp"
+              description="压缩率更高的现代图片格式"
+            >
+              WebP
+            </SelectItem>
+            <SelectItem
+              value="image/jpeg"
+              description="压缩率略为逊色，但是兼容性最佳的图片格式"
+            >
+              JPEG
+            </SelectItem>
           </SelectContent>
         </Select>
-        <p className="text-xs text-muted-foreground">
-          WebP 格式压缩率更高，但部分老旧软件可能不支持
-        </p>
       </div>
     </div>
   );
