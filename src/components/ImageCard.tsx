@@ -50,7 +50,7 @@ export function ImageCard({ image }: ImageCardProps) {
       </Button>
 
       {/* 缩略图 */}
-      <div className="aspect-square bg-muted flex items-center justify-center overflow-hidden">
+      <div className="aspect-square bg-border flex items-center justify-center overflow-hidden">
         <img
           src={image.thumbnailUrl}
           alt={image.name}
