@@ -1,11 +1,11 @@
-import { AlertCircle, Loader2, X } from 'lucide-react';
-import { formatCompressionRatio, formatFileSize } from '../lib/format';
-import { useImageStore } from '../store/useImageStore';
-import type { ImageFile } from '../types';
-import { Badge } from './ui/badge';
-import { Button } from './ui/button';
-import { Card } from './ui/card';
-import { Progress } from './ui/progress';
+import { AlertCircle, Loader2, X } from "lucide-react";
+import { formatCompressionRatio, formatFileSize } from "../lib/format";
+import { useImageStore } from "../store/useImageStore";
+import type { ImageFile } from "../types";
+import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
+import { Card } from "./ui/card";
+import { Progress } from "./ui/progress";
 
 interface ImageCardProps {
   image: ImageFile;
@@ -16,7 +16,7 @@ export function ImageCard({ image }: ImageCardProps) {
   const selectImage = useImageStore((state) => state.selectImage);
 
   const handleClick = () => {
-    if (image.status === 'done') {
+    if (image.status === "done") {
       selectImage(image.id);
     }
   };
@@ -29,8 +29,12 @@ export function ImageCard({ image }: ImageCardProps) {
   return (
     <Card
       className={`
-        relative overflow-hidden cursor-pointer transition-shadow hover:shadow-md py-0 gap-0
-        ${image.status === 'done' ? 'hover:ring-2 hover:ring-primary' : ''}
+        relative overflow-hidden cursor-pointer transition-shadow py-0 gap-0
+        ${
+          image.status === "done"
+            ? "transition-all hover:border-ring hover:ring-ring/50 hover:ring-[3px]"
+            : ""
+        }
       `}
       onClick={handleClick}
     >
@@ -54,14 +58,14 @@ export function ImageCard({ image }: ImageCardProps) {
         />
 
         {/* 处理中遮罩 */}
-        {image.status === 'processing' && (
+        {image.status === "processing" && (
           <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         )}
 
         {/* 错误遮罩 */}
-        {image.status === 'error' && (
+        {image.status === "error" && (
           <div className="absolute inset-0 bg-destructive/10 flex items-center justify-center">
             <AlertCircle className="h-8 w-8 text-destructive" />
           </div>
@@ -77,14 +81,14 @@ export function ImageCard({ image }: ImageCardProps) {
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-1">
             <span>{formatFileSize(image.originalSize)}</span>
-            {image.status === 'done' && image.compressedSize !== null && (
+            {image.status === "done" && image.compressedSize !== null && (
               <>
                 <span>→</span>
                 <span>{formatFileSize(image.compressedSize)}</span>
               </>
             )}
           </div>
-          {image.status === 'done' && image.compressedSize !== null && (
+          {image.status === "done" && image.compressedSize !== null && (
             <div className="flex items-center gap-2">
               <Badge
                 variant="secondary"
@@ -92,28 +96,28 @@ export function ImageCard({ image }: ImageCardProps) {
               >
                 {formatCompressionRatio(
                   image.originalSize,
-                  image.compressedSize,
+                  image.compressedSize
                 )}
               </Badge>
             </div>
           )}
 
-          {image.status === 'processing' && (
+          {image.status === "processing" && (
             <span className="text-primary">处理中...</span>
           )}
 
-          {image.status === 'error' && (
+          {image.status === "error" && (
             <span className="text-destructive" title={image.error}>
               失败
             </span>
           )}
 
-          {image.status === 'pending' && (
+          {image.status === "pending" && (
             <span className="text-muted-foreground">等待中</span>
           )}
         </div>
 
-        {image.status === 'processing' && (
+        {image.status === "processing" && (
           <Progress value={undefined} className="h-1" />
         )}
       </div>

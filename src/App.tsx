@@ -38,7 +38,7 @@ function App() {
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col lg:flex-row gap-6">
           {/* 左侧控制面板 */}
-          <aside className="w-full lg:w-80 shrink-0">
+          <aside className="w-full lg:w-72 shrink-0">
             <div className="lg:sticky lg:top-6 space-y-6">
               <div className="p-4 rounded-lg border-2 bg-card">
                 <h2 className="font-medium mb-4">压缩设置</h2>

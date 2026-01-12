@@ -1,11 +1,11 @@
 import {
   ReactCompareSlider,
   ReactCompareSliderImage,
-} from 'react-compare-slider';
-import { formatCompressionRatio, formatFileSize } from '../lib/format';
-import { useImageStore } from '../store/useImageStore';
-import { Badge } from './ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+} from "react-compare-slider";
+import { formatCompressionRatio, formatFileSize } from "../lib/format";
+import { useImageStore } from "../store/useImageStore";
+import { Badge } from "./ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 
 export function CompareModal() {
   const selectedImageId = useImageStore((state) => state.selectedImageId);
@@ -38,7 +38,7 @@ export function CompareModal() {
               >
                 {formatCompressionRatio(
                   selectedImage.originalSize,
-                  selectedImage.compressedSize,
+                  selectedImage.compressedSize
                 )}
               </Badge>
             )}
@@ -54,9 +54,9 @@ export function CompareModal() {
                   src={selectedImage.originalUrl}
                   alt="原图"
                   style={{
-                    objectFit: 'contain',
-                    width: '100%',
-                    height: '100%',
+                    objectFit: "contain",
+                    width: "100%",
+                    height: "100%",
                   }}
                 />
               }
@@ -65,13 +65,13 @@ export function CompareModal() {
                   src={selectedImage.compressedUrl}
                   alt="压缩后"
                   style={{
-                    objectFit: 'contain',
-                    width: '100%',
-                    height: '100%',
+                    objectFit: "contain",
+                    width: "100%",
+                    height: "100%",
                   }}
                 />
               }
-              style={{ height: '60vh' }}
+              style={{ height: "60vh" }}
             />
           </div>
 
@@ -80,7 +80,7 @@ export function CompareModal() {
             <div className="p-3 rounded-lg bg-muted">
               <p className="font-medium mb-1">原图</p>
               <p className="text-muted-foreground">
-                {selectedImage.originalWidth} × {selectedImage.originalHeight}{' '}
+                {selectedImage.originalWidth} × {selectedImage.originalHeight}{" "}
                 px
               </p>
               <p className="text-muted-foreground">
@@ -97,17 +97,17 @@ export function CompareModal() {
               </p>
               {selectedImage.compressedSize !== null && (
                 <p className="text-green-600 dark:text-green-400 font-medium">
-                  节省{' '}
+                  节省{" "}
                   {formatFileSize(
-                    selectedImage.originalSize - selectedImage.compressedSize,
+                    selectedImage.originalSize - selectedImage.compressedSize
                   )}
                 </p>
               )}
             </div>
           </div>
 
-          <p className="text-xs text-center text-muted-foreground">
-            拖动滑块对比压缩前后效果 · 左侧为原图，右侧为压缩后
+          <p className="text-sm text-center text-muted-foreground">
+            拖动滑块对比压缩前后效果 ・ 左侧为原图，右侧为压缩后
           </p>
         </div>
       </DialogContent>
