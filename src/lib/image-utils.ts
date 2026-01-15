@@ -1,24 +1,26 @@
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
 export function validateFile(file: File): { valid: boolean; error?: string } {
   if (!ALLOWED_TYPES.includes(file.type)) {
     return {
       valid: false,
-      error: `不支持的格式: ${file.type || '未知'}。仅支持 JPG、PNG、WebP`,
+      error: `不支持的格式: ${file.type || "未知"}。仅支持 JPG、PNG、WebP`,
     };
   }
   if (file.size > MAX_FILE_SIZE) {
     return {
       valid: false,
-      error: `文件过大: ${(file.size / 1024 / 1024).toFixed(1)}MB。最大支持 100MB`,
+      error: `文件过大: ${(file.size / 1024 / 1024).toFixed(
+        1
+      )}MB。最大支持 100MB`,
     };
   }
   return { valid: true };
 }
 
 export async function getImageDimensions(
-  file: File,
+  file: File
 ): Promise<{ width: number; height: number }> {
   const bitmap = await createImageBitmap(file);
   const { width, height } = bitmap;
@@ -28,7 +30,7 @@ export async function getImageDimensions(
 
 export async function generateThumbnail(
   file: File,
-  maxSize = 200,
+  maxSize = 400
 ): Promise<string> {
   const bitmap = await createImageBitmap(file);
   const { width, height } = bitmap;
@@ -48,20 +50,20 @@ export async function generateThumbnail(
     }
   }
 
-  const canvas = document.createElement('canvas');
+  const canvas = document.createElement("canvas");
   canvas.width = targetWidth;
   canvas.height = targetHeight;
 
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext("2d");
   if (!ctx) {
     bitmap.close();
-    throw new Error('无法创建 canvas context');
+    throw new Error("无法创建 canvas context");
   }
 
   ctx.drawImage(bitmap, 0, 0, targetWidth, targetHeight);
   bitmap.close();
 
-  return canvas.toDataURL('image/jpeg', 0.7);
+  return canvas.toDataURL("image/jpeg", 0.7);
 }
 
 export function generateId(): string {

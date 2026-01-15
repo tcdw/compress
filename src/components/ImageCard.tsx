@@ -50,11 +50,11 @@ export function ImageCard({ image }: ImageCardProps) {
       </Button>
 
       {/* 缩略图 */}
-      <div className="aspect-square bg-border flex items-center justify-center overflow-hidden">
+      <div className="aspect-3/2 bg-border flex items-center justify-center overflow-hidden">
         <img
           src={image.thumbnailUrl}
           alt={image.name}
-          className="w-full h-full object-contain"
+          className="w-full h-full object-cover"
         />
 
         {/* 处理中遮罩 */}
