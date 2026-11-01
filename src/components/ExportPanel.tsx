@@ -1,18 +1,23 @@
+import { Button } from '@tuuject/koi-react/button';
+import { Dialog } from '@tuuject/koi-react/dialog';
+import { css } from '@tuuject/koi-react/styled-system/css';
+import { useToast } from '@tuuject/koi-react/toast';
 import { saveAs } from 'file-saver';
 import JSZip from 'jszip';
-import { Download, FolderOpen, Loader2, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useFileSystemAccess } from '../hooks/useFileSystemAccess';
 import { getOutputFileName } from '../lib/format';
 import { useImageStore } from '../store/useImageStore';
-import { Button } from './ui/button';
+import { DownloadIcon, FolderIcon, TrashIcon } from './icons';
 
 export function ExportPanel() {
   const images = useImageStore((state) => state.images);
   const settings = useImageStore((state) => state.settings);
   const clearAllImages = useImageStore((state) => state.clearAllImages);
   const { isSupported, isExporting, exportToDirectory } = useFileSystemAccess();
+  const { toast } = useToast();
   const [isZipping, setIsZipping] = useState(false);
+  const [confirmClearOpen, setConfirmClearOpen] = useState(false);
 
   const completedImages = images.filter(
     (img) => img.status === 'done' && img.compressedBlob,
@@ -41,8 +46,14 @@ export function ExportPanel() {
 
       const blob = await zip.generateAsync({ type: 'blob' });
       saveAs(blob, '压缩喵-images.zip');
+      toast({
+        tone: 'success',
+        title: '压缩包已生成',
+        description: `${completedImages.length} 张图片`,
+      });
     } catch (error) {
       console.error('打包失败:', error);
+      toast({ tone: 'error', title: '打包失败，请重试' });
     } finally {
       setIsZipping(false);
     }
@@ -66,64 +77,99 @@ export function ExportPanel() {
         }
       }
 
-      await exportToDirectory(files);
+      const written = await exportToDirectory(files);
+      if (written) {
+        toast({
+          tone: 'success',
+          title: '已保存到文件夹',
+          description: `${files.length} 张图片`,
+        });
+      }
     } catch (error) {
       console.error('导出失败:', error);
+      toast({ tone: 'error', title: '导出失败，请确认文件夹权限后重试' });
     }
   };
 
   const handleClearAll = () => {
-    if (images.length > 0 && window.confirm('确定要清空所有图片吗？')) {
-      clearAllImages();
-    }
+    clearAllImages();
+    setConfirmClearOpen(false);
   };
 
   return (
-    <div className="space-y-3">
+    <div
+      className={css({ display: 'flex', flexDirection: 'column', gap: '3' })}
+    >
       <Button
-        className="w-full"
+        fullWidth
         onClick={handleDownloadZip}
-        disabled={!hasImages || isZipping}
+        disabled={!hasImages}
+        loading={isZipping}
+        iconStart={<DownloadIcon />}
       >
-        {isZipping ? (
-          <Loader2 className=" animate-spin" />
-        ) : (
-          <Download className="" />
-        )}
-        {isZipping ? '打包中...' : '下载 ZIP'}
+        {isZipping ? '打包中' : '下载 ZIP'}
       </Button>
 
       {isSupported && (
         <Button
+          fullWidth
+          color="secondary"
           variant="outline"
-          className="w-full"
           onClick={handleExportToFolder}
-          disabled={!hasImages || isExporting}
+          disabled={!hasImages}
+          loading={isExporting}
+          iconStart={<FolderIcon />}
         >
-          {isExporting ? (
-            <Loader2 className=" animate-spin" />
-          ) : (
-            <FolderOpen className="" />
-          )}
-          {isExporting ? '导出中...' : '保存到文件夹'}
+          {isExporting ? '导出中' : '保存到文件夹'}
         </Button>
       )}
 
       <Button
+        fullWidth
+        color="error"
         variant="ghost"
-        className="w-full text-destructive hover:text-destructive"
-        onClick={handleClearAll}
+        onClick={() => setConfirmClearOpen(true)}
         disabled={images.length === 0}
+        iconStart={<TrashIcon />}
       >
-        <Trash2 className="" />
         清空全部
       </Button>
 
       {hasImages && (
-        <p className="text-xs text-center text-muted-foreground">
+        <p
+          className={css({
+            margin: '0',
+            textStyle: 'small',
+            color: 'text-muted',
+            textAlign: 'center',
+          })}
+        >
           {completedImages.length} 张图片已就绪
         </p>
       )}
+
+      <Dialog
+        open={confirmClearOpen}
+        onOpenChange={setConfirmClearOpen}
+        role="alertdialog"
+        title="清空全部图片？"
+        description="已压缩的结果不会保留，需要重新导入图片。"
+        hideClose
+        footer={
+          <>
+            <Button
+              color="secondary"
+              variant="ghost"
+              onClick={() => setConfirmClearOpen(false)}
+            >
+              取消
+            </Button>
+            <Button color="error" onClick={handleClearAll}>
+              清空
+            </Button>
+          </>
+        }
+      />
     </div>
   );
 }

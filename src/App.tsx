@@ -1,83 +1,128 @@
-import { Cat } from 'lucide-react';
-import { useEffect } from 'react';
+import { Card } from '@tuuject/koi-react/card';
+import { Link } from '@tuuject/koi-react/link';
+import { css } from '@tuuject/koi-react/styled-system/css';
 import { CompareModal } from './components/CompareModal';
 import { ExportPanel } from './components/ExportPanel';
 import { GlobalSettings } from './components/GlobalSettings';
 import { ImageGrid } from './components/ImageGrid';
+import { CatIcon } from './components/icons';
 import { ThemeToggle } from './components/ThemeToggle';
 import { useImageProcessor } from './hooks/useImageProcessor';
-import { useImageStore } from './store/useImageStore';
+import {
+  CONTENT_MAX_WIDTH,
+  SHELL_Z_INDEX,
+  SIDEBAR_WIDTH,
+  TOPBAR_HEIGHT,
+} from './lib/styles';
 
-function App() {
-  const images = useImageStore((state) => state.images);
-  const settings = useImageStore((state) => state.settings);
-  const { processImage } = useImageProcessor();
-
-  // 新图片添加时自动处理
-  useEffect(() => {
-    const pendingImages = images.filter((img) => img.status === 'pending');
-    for (const image of pendingImages) {
-      processImage(image.id, settings);
-    }
-  }, [images, settings, processImage]);
+export function App() {
+  useImageProcessor();
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* 头部 */}
-      <header className="border-b">
-        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Cat className="h-6 w-6 text-primary" />
-            <h1 className="text-lg font-semibold">压缩喵</h1>
+    <div
+      className={css({
+        minHeight: '100dvh',
+        display: 'flex',
+        flexDirection: 'column',
+      })}
+    >
+      <header
+        className={css({
+          position: 'sticky',
+          top: '0',
+          zIndex: SHELL_Z_INDEX,
+          bg: 'surface',
+          borderBottomWidth: '1px',
+          borderBottomStyle: 'solid',
+          borderBottomColor: 'divider',
+        })}
+      >
+        <div
+          className={css({
+            maxWidth: CONTENT_MAX_WIDTH,
+            marginInline: 'auto',
+            height: TOPBAR_HEIGHT,
+            paddingInline: { base: '5', md: '6' },
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '4',
+          })}
+        >
+          <div
+            className={css({ display: 'flex', alignItems: 'center', gap: '2' })}
+          >
+            <CatIcon size={16} className={css({ color: 'text-brand' })} />
+            <h1 className={css({ margin: '0', textStyle: 'heading-3' })}>
+              压缩喵
+            </h1>
           </div>
           <ThemeToggle />
         </div>
       </header>
 
-      {/* 主体 */}
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* 左侧控制面板 */}
-          <aside className="w-full lg:w-72 shrink-0">
-            <div className="lg:sticky lg:top-6 space-y-6">
-              <div className="p-4 rounded-lg border bg-card">
-                <h2 className="font-medium mb-4">压缩设置</h2>
-                <GlobalSettings />
-              </div>
+      <div
+        className={css({
+          width: '100%',
+          maxWidth: CONTENT_MAX_WIDTH,
+          marginInline: 'auto',
+          paddingInline: { base: '5', md: '6' },
+          paddingBlock: '6',
+          display: 'flex',
+          flexDirection: { base: 'column', md: 'row' },
+          alignItems: 'flex-start',
+          gap: '6',
+        })}
+      >
+        <aside
+          className={css({
+            width: { base: '100%', md: SIDEBAR_WIDTH },
+            flexShrink: 0,
+            position: { md: 'sticky' },
+            top: { md: `calc(${TOPBAR_HEIGHT} + 24px)` },
+          })}
+        >
+          <div
+            className={css({
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4',
+            })}
+          >
+            <Card title="压缩设置">
+              <GlobalSettings />
+            </Card>
+            <Card title="导出">
+              <ExportPanel />
+            </Card>
+            <footer
+              className={css({
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1',
+                textStyle: 'small',
+                color: 'text-muted',
+              })}
+            >
+              <p className={css({ margin: '0' })}>所有处理均在浏览器本地完成</p>
+              <p className={css({ margin: '0' })}>图片不会上传到服务器</p>
+              <p className={css({ margin: '0' })}>
+                © {process.env.BUILD_YEAR} tcdw，以 MIT 协议发布
+              </p>
+              <p className={css({ margin: '0' })}>
+                <Link href="https://github.com/tcdw/compress" external>
+                  GitHub
+                </Link>
+              </p>
+            </footer>
+          </div>
+        </aside>
 
-              <div className="p-4 rounded-lg border bg-card">
-                <h2 className="font-medium mb-4">导出</h2>
-                <ExportPanel />
-              </div>
-
-              <div className="text-xs text-muted-foreground text-center space-y-1">
-                <p>所有处理均在浏览器本地完成</p>
-                <p>图片不会上传到服务器</p>
-                <p>
-                  &copy; {process.env.BUILD_YEAR} tcdw ・ Released under MIT
-                  License
-                </p>
-                <p>
-                  <a
-                    href="https://github.com/tcdw/compress"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    GitHub
-                  </a>
-                </p>
-              </div>
-            </div>
-          </aside>
-
-          {/* 右侧内容区 */}
-          <main className="flex-1 min-w-0">
-            <ImageGrid />
-          </main>
-        </div>
+        <main className={css({ flex: '1', minWidth: '0', width: '100%' })}>
+          <ImageGrid />
+        </main>
       </div>
 
-      {/* 对比模态框 */}
       <CompareModal />
     </div>
   );

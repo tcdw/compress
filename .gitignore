@@ -4,6 +4,7 @@
 *.log*
 
 # Dist
+styled-system/
 node_modules
 dist/
 

@@ -1,11 +1,13 @@
-import { AlertCircle, Loader2, X } from 'lucide-react';
+import { Badge } from '@tuuject/koi-react/badge';
+import { IconButton } from '@tuuject/koi-react/button';
+import { Card } from '@tuuject/koi-react/card';
+import { Spinner } from '@tuuject/koi-react/spinner';
+import { css } from '@tuuject/koi-react/styled-system/css';
 import { formatCompressionRatio, formatFileSize } from '../lib/format';
+import { focusRing } from '../lib/styles';
 import { useImageStore } from '../store/useImageStore';
 import type { ImageFile } from '../types';
-import { Badge } from './ui/badge';
-import { Button } from './ui/button';
-import { Card } from './ui/card';
-import { Progress } from './ui/progress';
+import { ArrowRightIcon, CloseIcon, ErrorIcon } from './icons';
 
 interface ImageCardProps {
   image: ImageFile;
@@ -15,107 +17,186 @@ export function ImageCard({ image }: ImageCardProps) {
   const removeImage = useImageStore((state) => state.removeImage);
   const selectImage = useImageStore((state) => state.selectImage);
 
-  const handleClick = () => {
-    if (image.status === 'done') {
-      selectImage(image.id);
-    }
-  };
+  const isDone = image.status === 'done';
+  const isProcessing = image.status === 'processing';
 
-  const handleRemove = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    removeImage(image.id);
-  };
+  const thumbnail = (
+    <img
+      src={image.thumbnailUrl}
+      alt={image.name}
+      className={css({
+        display: 'block',
+        width: '100%',
+        height: '100%',
+        objectFit: 'contain',
+      })}
+    />
+  );
 
   return (
     <Card
-      className={`
-        relative overflow-hidden cursor-pointer transition-shadow hover:shadow-md py-0 gap-0
-        ${image.status === 'done' ? 'hover:ring-2 hover:ring-primary' : ''}
-      `}
-      onClick={handleClick}
-    >
-      {/* 删除按钮 */}
-      <Button
-        variant="destructive"
-        size="icon-sm"
-        className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 hover:opacity-100"
-        onClick={handleRemove}
-        style={{ opacity: 1 }}
-      >
-        <X className="h-3 w-3" />
-      </Button>
+      padding="none"
+      className={css({
+        overflow: 'hidden',
+        transitionProperty: 'border-color',
+        transitionDuration: 'fast',
+        _hover: isDone ? { borderColor: 'action' } : undefined,
+      })}
+      media={
+        <div
+          className={css({
+            position: 'relative',
+            aspectRatio: '1',
+            bg: 'surface-muted',
+          })}
+        >
+          {isDone ? (
+            <button
+              type="button"
+              onClick={() => selectImage(image.id)}
+              aria-label={`对比 ${image.name} 的压缩效果`}
+              className={css({
+                display: 'block',
+                width: '100%',
+                height: '100%',
+                padding: '0',
+                border: 'none',
+                bg: 'transparent',
+                cursor: 'pointer',
+                _focusVisible: focusRing,
+              })}
+            >
+              {thumbnail}
+            </button>
+          ) : (
+            thumbnail
+          )}
 
-      {/* 缩略图 */}
-      <div className="aspect-square bg-muted flex items-center justify-center overflow-hidden">
-        <img
-          src={image.thumbnailUrl}
-          alt={image.name}
-          className="w-full h-full object-contain"
-        />
+          <IconButton
+            size="sm"
+            color="secondary"
+            variant="solid"
+            icon={<CloseIcon size={14} />}
+            label={`移除 ${image.name}`}
+            onClick={() => removeImage(image.id)}
+            className={css({
+              position: 'absolute',
+              top: '2',
+              right: '2',
+              zIndex: 1,
+            })}
+          />
 
-        {/* 处理中遮罩 */}
-        {image.status === 'processing' && (
-          <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        )}
-
-        {/* 错误遮罩 */}
-        {image.status === 'error' && (
-          <div className="absolute inset-0 bg-destructive/10 flex items-center justify-center">
-            <AlertCircle className="h-8 w-8 text-destructive" />
-          </div>
-        )}
-      </div>
-
-      {/* 信息区域 */}
-      <div className="p-3 space-y-2">
-        <p className="text-sm font-medium truncate" title={image.name}>
-          {image.name}
-        </p>
-
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <span>{formatFileSize(image.originalSize)}</span>
-            {image.status === 'done' && image.compressedSize !== null && (
-              <>
-                <span>→</span>
-                <span>{formatFileSize(image.compressedSize)}</span>
-              </>
-            )}
-          </div>
-          {image.status === 'done' && image.compressedSize !== null && (
-            <div className="flex items-center gap-2">
-              <Badge
-                variant="secondary"
-                className="text-green-600 dark:text-green-400"
-              >
-                {formatCompressionRatio(
-                  image.originalSize,
-                  image.compressedSize,
-                )}
-              </Badge>
+          {isProcessing && (
+            <div
+              className={css({
+                position: 'absolute',
+                inset: '0',
+                display: 'grid',
+                placeItems: 'center',
+                bg: 'surface-glass',
+                backdropBlur: 'panel',
+              })}
+            >
+              <Spinner size="lg" label="正在压缩" />
             </div>
           )}
 
-          {image.status === 'processing' && (
-            <span className="text-primary">处理中...</span>
+          {image.status === 'error' && (
+            <div
+              className={css({
+                position: 'absolute',
+                inset: '0',
+                display: 'grid',
+                placeItems: 'center',
+                bg: 'error-surface',
+              })}
+            >
+              <ErrorIcon size={16} className={css({ color: 'error-text' })} />
+            </div>
+          )}
+        </div>
+      }
+    >
+      <div
+        className={css({
+          padding: '3',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1',
+        })}
+      >
+        <p
+          title={image.name}
+          className={css({
+            margin: '0',
+            textStyle: 'label',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          })}
+        >
+          {image.name}
+        </p>
+
+        <div
+          className={css({
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '2',
+            textStyle: 'small',
+            color: 'text-muted',
+          })}
+        >
+          <span
+            className={css({
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '1',
+              fontVariantNumeric: 'tabular-nums',
+              whiteSpace: 'nowrap',
+            })}
+          >
+            {formatFileSize(image.originalSize)}
+            {isDone && image.compressedSize !== null && (
+              <>
+                <ArrowRightIcon size={12} />
+                <span className={css({ color: 'text' })}>
+                  {formatFileSize(image.compressedSize)}
+                </span>
+              </>
+            )}
+          </span>
+
+          {isDone && image.compressedSize !== null && (
+            <Badge tone="primary">
+              {formatCompressionRatio(image.originalSize, image.compressedSize)}
+            </Badge>
+          )}
+
+          {isProcessing && (
+            <span className={css({ color: 'text-brand' })}>处理中</span>
           )}
 
           {image.status === 'error' && (
-            <span className="text-destructive" title={image.error}>
+            <span
+              title={image.error}
+              className={css({
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '1',
+                color: 'error-text',
+              })}
+            >
+              <ErrorIcon size={12} />
               失败
             </span>
           )}
 
-          {image.status === 'pending' && (
-            <span className="text-muted-foreground">等待中</span>
-          )}
+          {image.status === 'pending' && <span>等待中</span>}
         </div>
-
-        {image.status === 'processing' && (
-          <Progress value={undefined} className="h-1" />
-        )}
       </div>
     </Card>
   );

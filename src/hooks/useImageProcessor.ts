@@ -99,6 +99,16 @@ export function useImageProcessor() {
     [processImage],
   );
 
+  // 新图片加入时自动处理；设置变更交给下面的防抖逻辑统一重跑
+  useEffect(() => {
+    if (images.length === 0) return;
+
+    const pendingImages = images.filter((img) => img.status === 'pending');
+    for (const image of pendingImages) {
+      processImage(image.id, settingsRef.current);
+    }
+  }, [images, processImage]);
+
   // 设置变更时防抖重新处理所有图片
   useEffect(() => {
     if (images.length === 0) return;

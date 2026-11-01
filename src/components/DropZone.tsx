@@ -1,14 +1,17 @@
-import { Upload } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { Alert } from '@tuuject/koi-react/alert';
+import { Button } from '@tuuject/koi-react/button';
+import { css } from '@tuuject/koi-react/styled-system/css';
+import { useCallback, useRef, useState } from 'react';
 import {
   generateId,
   generateThumbnail,
   getImageDimensions,
   validateFile,
 } from '../lib/image-utils';
+import { focusRing } from '../lib/styles';
 import { useImageStore } from '../store/useImageStore';
 import type { ImageFile } from '../types';
-import { Button } from './ui/button';
+import { UploadIcon } from './icons';
 
 interface DropZoneProps {
   compact?: boolean;
@@ -16,14 +19,14 @@ interface DropZoneProps {
 
 export function DropZone({ compact = false }: DropZoneProps) {
   const [isDragging, setIsDragging] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const addImages = useImageStore((state) => state.addImages);
 
   const processFiles = useCallback(
     async (files: FileList | File[]) => {
-      setError(null);
       const fileArray = Array.from(files);
-      const errors: string[] = [];
+      const rejected: string[] = [];
       const validFiles: File[] = [];
 
       for (const file of fileArray) {
@@ -31,15 +34,14 @@ export function DropZone({ compact = false }: DropZoneProps) {
         if (validation.valid) {
           validFiles.push(file);
         } else {
-          errors.push(`${file.name}: ${validation.error}`);
+          rejected.push(`${file.name}：${validation.error}`);
         }
       }
 
-      if (errors.length > 0) {
-        setError(errors.join('\n'));
+      if (validFiles.length === 0) {
+        setErrors(rejected);
+        return;
       }
-
-      if (validFiles.length === 0) return;
 
       const newImages: ImageFile[] = [];
 
@@ -66,8 +68,8 @@ export function DropZone({ compact = false }: DropZoneProps) {
             status: 'pending',
           });
         } catch (err) {
-          errors.push(
-            `${file.name}: ${err instanceof Error ? err.message : '处理失败'}`,
+          rejected.push(
+            `${file.name}：${err instanceof Error ? err.message : '处理失败'}`,
           );
         }
       }
@@ -76,9 +78,7 @@ export function DropZone({ compact = false }: DropZoneProps) {
         addImages(newImages);
       }
 
-      if (errors.length > 0) {
-        setError(errors.join('\n'));
-      }
+      setErrors(rejected);
     },
     [addImages],
   );
@@ -102,79 +102,148 @@ export function DropZone({ compact = false }: DropZoneProps) {
     [processFiles],
   );
 
-  const handleFileSelect = useCallback(() => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.multiple = true;
-    input.accept = 'image/jpeg,image/png,image/webp';
-    input.onchange = (e) => {
-      const files = (e.target as HTMLInputElement).files;
+  const openPicker = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
+
+  const handleFileInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.currentTarget.files;
       if (files) {
         processFiles(files);
       }
-    };
-    input.click();
-  }, [processFiles]);
+      // Let the same file be picked again after it was removed.
+      e.currentTarget.value = '';
+    },
+    [processFiles],
+  );
+
+  const errorAlert =
+    errors.length > 0 ? (
+      <Alert tone="error" title="有文件没能添加">
+        {errors.map((message, index) => (
+          <p key={`${index}-${message}`} className={css({ margin: '0' })}>
+            {message}
+          </p>
+        ))}
+      </Alert>
+    ) : null;
 
   if (compact) {
     return (
-      <Button variant="outline" onClick={handleFileSelect} className="w-full">
-        <Upload className="" />
-        添加更多图片
-      </Button>
+      <div
+        className={css({ display: 'flex', flexDirection: 'column', gap: '3' })}
+      >
+        <Button
+          fullWidth
+          color="secondary"
+          variant="outline"
+          iconStart={<UploadIcon />}
+          onClick={openPicker}
+        >
+          添加更多图片
+        </Button>
+        {errorAlert}
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept="image/jpeg,image/png,image/webp"
+          hidden
+          onChange={handleFileInputChange}
+        />
+      </div>
     );
   }
 
   return (
     <div
-      role="button"
-      tabIndex={0}
-      className={`
-        flex flex-col items-center justify-center gap-4 p-12
-        border-2 border-dashed rounded-lg transition-colors cursor-pointer
-        ${
-          isDragging
-            ? 'border-primary bg-primary/5'
-            : 'border-muted-foreground/25 hover:border-muted-foreground/50'
-        }
-      `}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-      onClick={handleFileSelect}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          handleFileSelect();
-        }
-      }}
+      className={css({ display: 'flex', flexDirection: 'column', gap: '3' })}
     >
-      <div className="flex flex-col items-center gap-2 text-center">
+      <div
+        role="button"
+        tabIndex={0}
+        aria-label="选择图片"
+        className={css({
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '4',
+          paddingBlock: '12',
+          paddingInline: { base: '5', md: '8' },
+          borderWidth: '2px',
+          borderStyle: 'dashed',
+          borderColor: isDragging ? 'action' : 'border-control',
+          borderRadius: 'panel',
+          bg: isDragging ? 'action-subtle' : 'transparent',
+          textAlign: 'center',
+          cursor: 'pointer',
+          transitionProperty: 'background-color, border-color',
+          transitionDuration: 'fast',
+          _hover: {
+            borderColor: isDragging ? 'action' : 'border-control-hover',
+          },
+          _focusVisible: focusRing,
+        })}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onClick={openPicker}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openPicker();
+          }
+        }}
+      >
         <div
-          className={`
-            p-4 rounded-full transition-colors
-            ${isDragging ? 'bg-primary/10' : 'bg-muted'}
-          `}
+          className={css({
+            display: 'grid',
+            placeItems: 'center',
+            width: 'control-lg',
+            height: 'control-lg',
+            borderRadius: 'full',
+            bg: isDragging ? 'action' : 'action-subtle',
+            color: isDragging ? 'on-action' : 'on-action-subtle',
+            transitionProperty: 'background-color, color',
+            transitionDuration: 'fast',
+          })}
         >
-          <Upload
-            className={`h-8 w-8 ${
-              isDragging ? 'text-primary' : 'text-muted-foreground'
-            }`}
-          />
+          <UploadIcon size={16} />
         </div>
-        <div>
-          <p className="text-lg font-medium">
+        <div
+          className={css({
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1',
+          })}
+        >
+          <p className={css({ margin: '0', textStyle: 'heading-3' })}>
             拖拽图片到这里，或直接点我选择文件
           </p>
+          <p
+            className={css({
+              margin: '0',
+              textStyle: 'small',
+              color: 'text-muted',
+            })}
+          >
+            支持 JPG、PNG、WebP 格式，单张最大 100MB
+          </p>
         </div>
-        <p className="text-xs text-muted-foreground">
-          支持 JPG、PNG、WebP 格式
-        </p>
       </div>
-      {error && (
-        <div className="text-sm text-destructive text-center whitespace-pre-line">
-          {error}
-        </div>
-      )}
+
+      {errorAlert}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept="image/jpeg,image/png,image/webp"
+        hidden
+        onChange={handleFileInputChange}
+      />
     </div>
   );
 }

@@ -5,13 +5,13 @@ export function validateFile(file: File): { valid: boolean; error?: string } {
   if (!ALLOWED_TYPES.includes(file.type)) {
     return {
       valid: false,
-      error: `不支持的格式: ${file.type || '未知'}。仅支持 JPG、PNG、WebP`,
+      error: `不支持的格式：${file.type || '未知'}。仅支持 JPG、PNG、WebP`,
     };
   }
   if (file.size > MAX_FILE_SIZE) {
     return {
       valid: false,
-      error: `文件过大: ${(file.size / 1024 / 1024).toFixed(1)}MB。最大支持 100MB`,
+      error: `文件过大：${(file.size / 1024 / 1024).toFixed(1)}MB。最大支持 100MB`,
     };
   }
   return { valid: true };

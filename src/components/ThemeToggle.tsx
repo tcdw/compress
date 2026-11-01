@@ -1,43 +1,17 @@
-import { Moon, Sun } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { Button } from './ui/button';
+import { IconButton } from '@tuuject/koi-react/button';
+import { useTheme } from '../hooks/useTheme';
+import { MoonIcon, SunIcon } from './icons';
 
-type Theme = 'light' | 'dark';
-
+/** Light / dark toggle in the header; the state itself lives in theme-init.js (<html data-theme>). */
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('theme') as Theme | null;
-      if (stored) return stored;
-      return window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light';
-    }
-    return 'light';
-  });
-
-  useEffect(() => {
-    const root = document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
-  };
+  const { theme, toggle } = useTheme();
 
   return (
-    <Button variant="ghost" size="icon" onClick={toggleTheme}>
-      {theme === 'light' ? (
-        <Moon className="h-5 w-5" />
-      ) : (
-        <Sun className="h-5 w-5" />
-      )}
-      <span className="sr-only">切换主题</span>
-    </Button>
+    <IconButton
+      size="sm"
+      icon={theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+      label={theme === 'dark' ? '切换到浅色模式' : '切换到深色模式'}
+      onClick={toggle}
+    />
   );
 }

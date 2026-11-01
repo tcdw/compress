@@ -1,3 +1,4 @@
+import { ToastProvider } from '@tuuject/koi-react/toast';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
@@ -9,7 +10,9 @@ if (rootEl) {
   const root = ReactDOM.createRoot(rootEl);
   root.render(
     <React.StrictMode>
-      <App />
+      <ToastProvider>
+        <App />
+      </ToastProvider>
     </React.StrictMode>,
   );
 }

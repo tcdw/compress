@@ -1,23 +1,61 @@
+import { Button } from '@tuuject/koi-react/button';
+import { Field } from '@tuuject/koi-react/field';
+import { Input } from '@tuuject/koi-react/input';
+import { Select } from '@tuuject/koi-react/select';
+import { css } from '@tuuject/koi-react/styled-system/css';
+import { focusRing } from '../lib/styles';
 import { useImageStore } from '../store/useImageStore';
 import type { OutputFormat } from '../types';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from './ui/select';
-import { Slider } from './ui/slider';
 
-const WIDTH_PRESETS = [
-  { label: '800px', value: 800 },
-  { label: '1200px', value: 1200 },
-  { label: '1920px', value: 1920 },
+const QUALITY_MIN = 0.1;
+
+const WIDTH_PRESETS: Array<{ label: string; value: number | null }> = [
+  { label: '800', value: 800 },
+  { label: '1200', value: 1200 },
+  { label: '1920', value: 1920 },
   { label: '不限制', value: null },
 ];
+
+const FORMAT_OPTIONS = [
+  { value: 'original', label: '保持原格式' },
+  { value: 'image/webp', label: 'WebP' },
+  { value: 'image/jpeg', label: 'JPEG' },
+];
+
+const FORMAT_HELP: Record<OutputFormat, string> = {
+  original: 'PNG 保持无损，压缩质量设置对它不起作用',
+  'image/webp': '压缩率更高的现代格式，主流浏览器都支持',
+  'image/jpeg': '兼容性最好，压缩率略逊于 WebP',
+};
+
+const sliderClass = css({
+  appearance: 'none',
+  width: '100%',
+  height: '6px',
+  marginBlock: '2',
+  borderRadius: 'full',
+  cursor: 'pointer',
+  '&::-webkit-slider-thumb': {
+    appearance: 'none',
+    width: '20px',
+    height: '20px',
+    borderRadius: 'full',
+    borderWidth: '2px',
+    borderStyle: 'solid',
+    borderColor: 'action',
+    background: 'surface',
+  },
+  '&::-moz-range-thumb': {
+    width: '20px',
+    height: '20px',
+    borderRadius: 'full',
+    borderWidth: '2px',
+    borderStyle: 'solid',
+    borderColor: 'action',
+    background: 'surface',
+  },
+  _focusVisible: focusRing,
+});
 
 export function GlobalSettings() {
   const settings = useImageStore((state) => state.settings);
@@ -25,98 +63,115 @@ export function GlobalSettings() {
   const setMaxWidth = useImageStore((state) => state.setMaxWidth);
   const setOutputFormat = useImageStore((state) => state.setOutputFormat);
 
+  const qualityPercent = Math.round(settings.quality * 100);
+  const filledPercent =
+    ((settings.quality - QUALITY_MIN) / (1 - QUALITY_MIN)) * 100;
+
   const handleWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value === '' || value === '0') {
       setMaxWidth(null);
-    } else {
-      const num = Number.parseInt(value, 10);
-      if (!Number.isNaN(num) && num > 0) {
-        setMaxWidth(num);
-      }
+      return;
+    }
+    const num = Number.parseInt(value, 10);
+    if (!Number.isNaN(num) && num > 0) {
+      setMaxWidth(num);
     }
   };
 
   return (
-    <div className="space-y-6">
-      {/* 压缩质量 */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <Label>压缩质量</Label>
-          <span className="text-sm text-muted-foreground">
-            {Math.round(settings.quality * 100)}%
+    <div
+      className={css({ display: 'flex', flexDirection: 'column', gap: '5' })}
+    >
+      <div
+        className={css({ display: 'flex', flexDirection: 'column', gap: '1' })}
+      >
+        <div
+          className={css({
+            display: 'flex',
+            alignItems: 'baseline',
+            justifyContent: 'space-between',
+            gap: '2',
+          })}
+        >
+          <label htmlFor="quality" className={css({ textStyle: 'label' })}>
+            压缩质量
+          </label>
+          <span
+            className={css({
+              textStyle: 'small',
+              color: 'text-muted',
+              fontVariantNumeric: 'tabular-nums',
+            })}
+          >
+            {qualityPercent}%
           </span>
         </div>
-        <Slider
-          value={[settings.quality]}
-          onValueChange={([value]) => setQuality(value)}
-          min={0.1}
+        <input
+          id="quality"
+          type="range"
+          min={QUALITY_MIN}
           max={1}
           step={0.05}
+          value={settings.quality}
+          aria-valuetext={`${qualityPercent}%`}
+          onChange={(e) => setQuality(e.currentTarget.valueAsNumber)}
+          className={sliderClass}
+          style={{
+            background: `linear-gradient(to right, var(--colors-action) ${filledPercent}%, var(--colors-surface-muted) ${filledPercent}%)`,
+          }}
         />
-        <p className="text-xs text-muted-foreground">
+        <p
+          className={css({
+            margin: '0',
+            textStyle: 'small',
+            color: 'text-muted',
+          })}
+        >
           数值越低压缩率越高，但图片质量会下降
         </p>
       </div>
 
-      {/* 最大宽度 */}
-      <div className="space-y-3">
-        <Label>最大宽度 (px)</Label>
-        <Input
-          type="number"
-          placeholder="不限制"
-          value={settings.maxWidth ?? ''}
-          onChange={handleWidthChange}
-          min={0}
-        />
-        <div className="flex flex-wrap gap-2">
+      <div
+        className={css({ display: 'flex', flexDirection: 'column', gap: '2' })}
+      >
+        <Field label="最大宽度（px）" help="超过此宽度的图片会按比例缩小">
+          <Input
+            type="number"
+            inputMode="numeric"
+            placeholder="不限制"
+            min={0}
+            value={settings.maxWidth ?? ''}
+            onChange={handleWidthChange}
+          />
+        </Field>
+        <div className={css({ display: 'flex', flexWrap: 'wrap', gap: '2' })}>
           {WIDTH_PRESETS.map((preset) => (
             <Button
               key={preset.label}
-              variant={
-                settings.maxWidth === preset.value ? 'default' : 'outline'
-              }
               size="sm"
+              color={
+                settings.maxWidth === preset.value ? 'primary' : 'secondary'
+              }
+              variant={settings.maxWidth === preset.value ? 'solid' : 'outline'}
+              aria-pressed={settings.maxWidth === preset.value}
               onClick={() => setMaxWidth(preset.value)}
             >
               {preset.label}
             </Button>
           ))}
         </div>
-        <p className="text-xs text-muted-foreground">
-          超过此宽度的图片会按比例缩小
-        </p>
       </div>
 
-      {/* 输出格式 */}
-      <div className="space-y-3">
-        <Label>输出格式</Label>
+      <Field label="输出格式" help={FORMAT_HELP[settings.outputFormat]}>
         <Select
+          options={FORMAT_OPTIONS}
           value={settings.outputFormat}
-          onValueChange={(value) => setOutputFormat(value as OutputFormat)}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="original" description="png 格式不支持降低画质">
-              保持原格式
-            </SelectItem>
-            <SelectItem
-              value="image/webp"
-              description="压缩率更高的现代图片格式"
-            >
-              WebP
-            </SelectItem>
-            <SelectItem
-              value="image/jpeg"
-              description="压缩率略为逊色，但是兼容性最佳的图片格式"
-            >
-              JPEG
-            </SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+          onChange={(e) =>
+            setOutputFormat(e.currentTarget.value as OutputFormat)
+          }
+        />
+      </Field>
     </div>
   );
 }

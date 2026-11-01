@@ -12,8 +12,8 @@
 
 *请 Agent 严格遵守以下技术栈，以保证开发效率和 Vibe：*
 - **框架:** React + Repack (推荐 TypeScript)
-- **UI 库:** shadcn/ui + Tailwind CSS (保证现代简洁的 UI 风格)
-- **图标:** Lucide React
+- **UI 库:** Koi UI (`@tuuject/koi-react`) + Panda CSS，主题与配色由 `@tuuject/koi-tokens` 的 `data-theme`、`data-palette` 控制
+- **图标:** Font Awesome Free Solid（Iconify 数据，经 Koi 的 `Icon` 渲染）
 - **核心逻辑库:**
   - `jszip`: 用于打包生成 Zip。
   - `file-saver`: 用于触发下载。
