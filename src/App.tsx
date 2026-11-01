@@ -1,4 +1,4 @@
-import { Card } from '@tuuject/koi-react/card';
+import { Divider } from '@tuuject/koi-react/divider';
 import { Link } from '@tuuject/koi-react/link';
 import { css } from '@tuuject/koi-react/styled-system/css';
 import { CompareModal } from './components/CompareModal';
@@ -86,15 +86,39 @@ export function App() {
             className={css({
               display: 'flex',
               flexDirection: 'column',
-              gap: '4',
+              gap: '5',
             })}
           >
-            <Card title="压缩设置">
+            <section>
+              <h2
+                className={css({
+                  margin: '0',
+                  marginBlockEnd: '4',
+                  textStyle: 'heading-3',
+                })}
+              >
+                压缩设置
+              </h2>
               <GlobalSettings />
-            </Card>
-            <Card title="导出">
+            </section>
+
+            <Divider />
+
+            <section>
+              <h2
+                className={css({
+                  margin: '0',
+                  marginBlockEnd: '4',
+                  textStyle: 'heading-3',
+                })}
+              >
+                导出
+              </h2>
               <ExportPanel />
-            </Card>
+            </section>
+
+            <Divider />
+
             <footer
               className={css({
                 display: 'flex',
