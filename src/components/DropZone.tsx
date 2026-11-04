@@ -1,5 +1,6 @@
 import { Alert } from '@tuuject/koi-react/alert';
 import { Button } from '@tuuject/koi-react/button';
+import { DropZone as KoiDropZone } from '@tuuject/koi-react/drop-zone';
 import { css } from '@tuuject/koi-react/styled-system/css';
 import { useCallback, useRef, useState } from 'react';
 import {
@@ -8,7 +9,6 @@ import {
   getImageDimensions,
   validateFile,
 } from '../lib/image-utils';
-import { focusRing } from '../lib/styles';
 import { useImageStore } from '../store/useImageStore';
 import type { ImageFile } from '../types';
 import { UploadIcon } from './icons';
@@ -18,7 +18,6 @@ interface DropZoneProps {
 }
 
 export function DropZone({ compact = false }: DropZoneProps) {
-  const [isDragging, setIsDragging] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const addImages = useImageStore((state) => state.addImages);
@@ -83,25 +82,6 @@ export function DropZone({ compact = false }: DropZoneProps) {
     [addImages],
   );
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  }, []);
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  }, []);
-
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      setIsDragging(false);
-      processFiles(e.dataTransfer.files);
-    },
-    [processFiles],
-  );
-
   const openPicker = useCallback(() => {
     fileInputRef.current?.click();
   }, []);
@@ -160,90 +140,15 @@ export function DropZone({ compact = false }: DropZoneProps) {
     <div
       className={css({ display: 'flex', flexDirection: 'column', gap: '3' })}
     >
-      <div
-        role="button"
-        tabIndex={0}
-        aria-label="选择图片"
-        className={css({
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '4',
-          paddingBlock: '12',
-          paddingInline: { base: '5', md: '8' },
-          borderWidth: '2px',
-          borderStyle: 'dashed',
-          borderColor: isDragging ? 'action' : 'border-control',
-          borderRadius: 'panel',
-          bg: isDragging ? 'action-subtle' : 'transparent',
-          textAlign: 'center',
-          cursor: 'pointer',
-          transitionProperty: 'background-color, border-color',
-          transitionDuration: 'fast',
-          _hover: {
-            borderColor: isDragging ? 'action' : 'border-control-hover',
-          },
-          _focusVisible: focusRing,
-        })}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={openPicker}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            openPicker();
-          }
-        }}
-      >
-        <div
-          className={css({
-            display: 'grid',
-            placeItems: 'center',
-            width: 'control-lg',
-            height: 'control-lg',
-            borderRadius: 'full',
-            bg: isDragging ? 'action' : 'action-subtle',
-            color: isDragging ? 'on-action' : 'on-action-subtle',
-            transitionProperty: 'background-color, color',
-            transitionDuration: 'fast',
-          })}
-        >
-          <UploadIcon size={16} />
-        </div>
-        <div
-          className={css({
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '1',
-          })}
-        >
-          <p className={css({ margin: '0', textStyle: 'heading-3' })}>
-            拖拽图片到这里，或直接点我选择文件
-          </p>
-          <p
-            className={css({
-              margin: '0',
-              textStyle: 'small',
-              color: 'text-muted',
-            })}
-          >
-            支持 JPG、PNG、WebP 格式，单张最大 100MB
-          </p>
-        </div>
-      </div>
-
-      {errorAlert}
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple
+      <KoiDropZone
+        title="拖拽图片到这里，或直接点我选择文件"
+        description="支持 JPG、PNG、WebP 格式，单张最大 100MB"
         accept="image/jpeg,image/png,image/webp"
-        hidden
-        onChange={handleFileInputChange}
+        onFiles={(files) => {
+          void processFiles(files);
+        }}
       />
+      {errorAlert}
     </div>
   );
 }

@@ -12,8 +12,8 @@
   },
   "dependencies": {
     "@iconify-icons/fa7-solid": "^2.0.0",
-    "@tuuject/koi-react": "^0.1.0",
-    "@tuuject/koi-tokens": "^0.1.0",
+    "@tuuject/koi-react": "0.2.0",
+    "@tuuject/koi-tokens": "0.2.0",
     "file-saver": "^2.0.5",
     "jszip": "^3.10.2",
     "react": "^19.2.9",

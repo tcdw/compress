@@ -2,12 +2,10 @@ import { Button } from '@tuuject/koi-react/button';
 import { Field } from '@tuuject/koi-react/field';
 import { Input } from '@tuuject/koi-react/input';
 import { Select } from '@tuuject/koi-react/select';
+import { Slider } from '@tuuject/koi-react/slider';
 import { css } from '@tuuject/koi-react/styled-system/css';
-import { focusRing } from '../lib/styles';
 import { useImageStore } from '../store/useImageStore';
 import type { OutputFormat } from '../types';
-
-const QUALITY_MIN = 0.1;
 
 const WIDTH_PRESETS: Array<{ label: string; value: number | null }> = [
   { label: '800', value: 800 },
@@ -28,44 +26,11 @@ const FORMAT_HELP: Record<OutputFormat, string> = {
   'image/jpeg': '兼容性最好，压缩率略逊于 WebP',
 };
 
-const sliderClass = css({
-  appearance: 'none',
-  width: '100%',
-  height: '6px',
-  marginBlock: '2',
-  borderRadius: 'full',
-  cursor: 'pointer',
-  '&::-webkit-slider-thumb': {
-    appearance: 'none',
-    width: '20px',
-    height: '20px',
-    borderRadius: 'full',
-    borderWidth: '2px',
-    borderStyle: 'solid',
-    borderColor: 'action',
-    background: 'surface',
-  },
-  '&::-moz-range-thumb': {
-    width: '20px',
-    height: '20px',
-    borderRadius: 'full',
-    borderWidth: '2px',
-    borderStyle: 'solid',
-    borderColor: 'action',
-    background: 'surface',
-  },
-  _focusVisible: focusRing,
-});
-
 export function GlobalSettings() {
   const settings = useImageStore((state) => state.settings);
   const setQuality = useImageStore((state) => state.setQuality);
   const setMaxWidth = useImageStore((state) => state.setMaxWidth);
   const setOutputFormat = useImageStore((state) => state.setOutputFormat);
-
-  const qualityPercent = Math.round(settings.quality * 100);
-  const filledPercent =
-    ((settings.quality - QUALITY_MIN) / (1 - QUALITY_MIN)) * 100;
 
   const handleWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -84,42 +49,17 @@ export function GlobalSettings() {
       className={css({ display: 'flex', flexDirection: 'column', gap: '5' })}
     >
       <div
-        className={css({ display: 'flex', flexDirection: 'column', gap: '1' })}
+        className={css({ display: 'flex', flexDirection: 'column', gap: '2' })}
       >
-        <div
-          className={css({
-            display: 'flex',
-            alignItems: 'baseline',
-            justifyContent: 'space-between',
-            gap: '2',
-          })}
-        >
-          <label htmlFor="quality" className={css({ textStyle: 'label' })}>
-            压缩质量
-          </label>
-          <span
-            className={css({
-              textStyle: 'small',
-              color: 'text-muted',
-              fontVariantNumeric: 'tabular-nums',
-            })}
-          >
-            {qualityPercent}%
-          </span>
-        </div>
-        <input
-          id="quality"
-          type="range"
-          min={QUALITY_MIN}
+        <Slider
+          label="压缩质量"
+          showValue
+          formatValue={(value) => `${Math.round(value * 100)}%`}
+          min={0.1}
           max={1}
           step={0.05}
           value={settings.quality}
-          aria-valuetext={`${qualityPercent}%`}
-          onChange={(e) => setQuality(e.currentTarget.valueAsNumber)}
-          className={sliderClass}
-          style={{
-            background: `linear-gradient(to right, var(--colors-action) ${filledPercent}%, var(--colors-surface-muted) ${filledPercent}%)`,
-          }}
+          onValueChange={(value) => setQuality(value)}
         />
         <p
           className={css({
